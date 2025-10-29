@@ -18,3 +18,9 @@ View your app in AI Studio: https://ai.studio/apps/drive/1LMoRCdzixRDVCh09M_Xk7k
 2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
 3. Run the app:
    `npm run dev`
+
+## Deployment
+
+The application is automatically deployed to GitHub Pages. You can view the live deployment here:
+
+[https://auliawiraapotekalpro.github.io/SystemGATicket/](https://auliawiraapotekalpro.github.io/SystemGATicket/)
