@@ -15,7 +15,6 @@ import { ClockIcon } from './icons/ClockIcon';
 import ScheduleModal from './ScheduleModal';
 import RatingView from './RatingView';
 import AttachmentPreviewModal from './AttachmentPreviewModal';
-import ScheduleSuggestionView from './ScheduleSuggestionView';
 
 
 interface OfficerDashboardProps {
@@ -339,7 +338,13 @@ const OfficerDashboard: React.FC<OfficerDashboardProps> = ({ user, onLogout, tic
         case 'Lihat Rating':
             return <RatingView user={user} tickets={tickets} />;
         case 'Saran Penjadwalan':
-             return <ScheduleSuggestionView user={user} tickets={tickets} />;
+             return (
+                <div className="bg-white p-6 rounded-2xl shadow-lg w-full text-center text-slate-500 py-16">
+                    <ScheduleIcon className="w-24 h-24 text-slate-300 mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold text-slate-700">Fitur Dalam Pengembangan</h3>
+                    <p className="mt-1">Saran penjadwalan akan segera tersedia.</p>
+                </div>
+            );
         default:
             return null;
     }
@@ -359,7 +364,7 @@ const OfficerDashboard: React.FC<OfficerDashboardProps> = ({ user, onLogout, tic
               className={`w-full flex items-center text-left px-4 py-3 rounded-lg transition-colors ${
                 activeMenu === 'Lihat Tiket'
                   ? 'bg-indigo-100 text-indigo-600 font-semibold'
-                                    : 'text-slate-600 hover:bg-slate-100'
+                  : 'text-slate-600 hover:bg-slate-100'
               }`}
             >
               <MenuTicketIcon className="w-5 h-5 mr-3" />

@@ -262,7 +262,7 @@ const UserDashboard: React.FC<UserDashboardProps> = ({ user, onLogout, onCreateT
   const [subCategories, setSubCategories] = useState<string[]>([]);
   const [selectedSubCategory, setSelectedSubCategory] = useState('');
   const [description, setDescription] = useState('');
-  const [attachments, setAttachments] = useState<{ id: string; file: File }[]>([]);
+  const [attachments, setAttachments] = useState<File[]>([]);
   
   const [activeFilter, setActiveFilter] = useState<'all' | 'reviewed' | 'unreviewed'>('all');
 
@@ -291,17 +291,13 @@ const UserDashboard: React.FC<UserDashboardProps> = ({ user, onLogout, onCreateT
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      const newFiles = Array.from(e.target.files).map(file => ({
-        id: crypto.randomUUID(),
-        file: file,
-      }));
-      setAttachments(prev => [...prev, ...newFiles]);
+        setAttachments(prev => [...prev, ...Array.from(e.target.files!)]);
     }
     e.target.value = ''; // Allow selecting the same file again
   };
 
-  const handleRemoveAttachment = (idToRemove: string) => {
-    setAttachments(prev => prev.filter(attachment => attachment.id !== idToRemove));
+  const handleRemoveAttachment = (fileToRemove: File) => {
+    setAttachments(prev => prev.filter(file => file !== fileToRemove));
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -320,7 +316,7 @@ const UserDashboard: React.FC<UserDashboardProps> = ({ user, onLogout, onCreateT
           category: selectedCategory,
           subCategory: selectedSubCategory,
           description,
-          attachments: attachments.map(a => a.file),
+          attachments,
         });
 
         // Reset form and show success message
@@ -403,10 +399,10 @@ const UserDashboard: React.FC<UserDashboardProps> = ({ user, onLogout, onCreateT
                 {attachments.length > 0 && (
                     <div className="mt-3 space-y-2">
                         <ul className="space-y-1">
-                            {attachments.map((attachment) => (
-                                <li key={attachment.id} className="flex items-center justify-between text-sm text-slate-700 bg-slate-100 px-3 py-1.5 rounded-md">
-                                    <span className="truncate mr-2" title={attachment.file.name}>{attachment.file.name}</span>
-                                    <button type="button" onClick={() => handleRemoveAttachment(attachment.id)} className="p-1 text-red-500 hover:text-red-700 rounded-full hover:bg-red-100 flex-shrink-0" aria-label={`Remove ${attachment.file.name}`}>
+                            {attachments.map((file) => (
+                                <li key={`${file.name}-${file.size}-${file.lastModified}`} className="flex items-center justify-between text-sm text-slate-700 bg-slate-100 px-3 py-1.5 rounded-md">
+                                    <span className="truncate mr-2" title={file.name}>{file.name}</span>
+                                    <button type="button" onClick={() => handleRemoveAttachment(file)} className="p-1 text-red-500 hover:text-red-700 rounded-full hover:bg-red-100 flex-shrink-0" aria-label={`Remove ${file.name}`}>
                                         <XIcon className="w-4 h-4" />
                                     </button>
                                 </li>
