@@ -14,6 +14,7 @@ import { CheckCircleIcon } from './icons/CheckCircleIcon';
 import { ChevronDownIcon } from './icons/ChevronDownIcon';
 import { XIcon } from './icons/XIcon';
 import { SpinnerIcon } from './icons/SpinnerIcon';
+import { InfoIcon } from './icons/InfoIcon';
 
 
 interface UserDashboardProps {
@@ -280,6 +281,8 @@ const UserDashboard: React.FC<UserDashboardProps> = ({ user, onLogout, onCreateT
   const completedAndUnreviewedTicketsCount = tickets.filter(
     (ticket) => ticket.unit === user.username && ticket.status === TicketStatus.Completed && !ticket.review
   ).length;
+  
+  const hasPendingReview = completedAndUnreviewedTicketsCount > 0;
 
 
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -342,98 +345,118 @@ const UserDashboard: React.FC<UserDashboardProps> = ({ user, onLogout, onCreateT
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
         {/* Create Ticket Form */}
         <div className="bg-white p-8 rounded-2xl shadow-lg w-full">
-        <div className="flex items-center mb-6">
-            <PlusCircleIcon className="w-7 h-7 text-indigo-500 mr-3" />
-            <h2 className="text-xl font-bold text-slate-800">Buat Tiket Baru</h2>
-        </div>
-        <form className="space-y-5" onSubmit={handleSubmit}>
-            <div className="relative">
-            <UserIcon className="w-5 h-5 text-slate-400 absolute top-1/2 left-4 -translate-y-1/2" />
-            <input type="text" placeholder="Nama Anda" value={reporterName} onChange={(e) => setReporterName(e.target.value)} required className="w-full pl-12 pr-4 py-3 border border-slate-200 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition" />
+        {hasPendingReview ? (
+             <div className="flex flex-col items-center justify-center text-center p-6 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 rounded-lg h-full">
+                <InfoIcon className="w-12 h-12 text-yellow-500 mb-4" />
+                <h3 className="text-lg font-bold">Harap Selesaikan Review Anda</h3>
+                <p className="mt-2 text-sm max-w-sm">
+                    Anda tidak dapat membuat tiket baru karena masih ada <strong>{completedAndUnreviewedTicketsCount} tiket</strong> yang sudah selesai namun belum Anda review.
+                </p>
+                <p className="mt-1 text-sm">
+                    Mohon berikan penilaian untuk menyelesaikan proses.
+                </p>
+                <button 
+                    onClick={() => setActiveMenu('Beri Review')}
+                    className="mt-6 px-6 py-2 bg-yellow-500 text-white font-semibold rounded-lg hover:bg-yellow-600 transition-colors shadow-md">
+                    Beri Review Sekarang
+                </button>
             </div>
-            <div className="relative">
-            <PencilIcon className="w-5 h-5 text-slate-400 absolute top-1/2 left-4 -translate-y-1/2" />
-            <input type="text" placeholder="Judul Laporan" value={title} onChange={(e) => setTitle(e.target.value)} required className="w-full pl-12 pr-4 py-3 border border-slate-200 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition" />
-            </div>
-            <div className="relative">
-            <BuildingIcon className="w-5 h-5 text-slate-400 absolute top-1/2 left-4 -translate-y-1/2" />
-            <input type="text" value={user.username} disabled className="w-full pl-12 pr-4 py-3 border border-slate-200 rounded-lg bg-slate-100 text-slate-500 cursor-not-allowed" />
-            </div>
-            <select 
-                value={selectedCategory}
-                onChange={handleCategoryChange}
-                required
-                className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition text-slate-500"
-            >
-            <option value="">Kategori</option>
-            <option value="AC">AC</option>
-            <option value="Kelistrikan">Kelistrikan</option>
-            <option value="Perabotan">Perabotan</option>
-            <option value="Saluran Air">Saluran Air</option>
-            </select>
-            <select 
-                value={selectedSubCategory}
-                onChange={(e) => setSelectedSubCategory(e.target.value)}
-                disabled={!selectedCategory}
-                required
-                className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition text-slate-500 disabled:bg-slate-100 disabled:cursor-not-allowed"
-            >
-                <option value="">Sub Kategori</option>
-                {subCategories.map(subCat => (
-                <option key={subCat} value={subCat}>{subCat}</option>
-                ))}
-            </select>
-            <div>
-                <label htmlFor="file-upload" className="w-full cursor-pointer flex items-center justify-center py-3 px-4 border border-dashed border-slate-300 rounded-lg text-sm font-medium text-slate-500 bg-slate-50 hover:bg-slate-100 focus:outline-none transition-colors">
-                    <UploadIcon className="w-5 h-5 mr-2" />
-                    <span>Upload Lampiran</span>
-                </label>
-                <input 
-                    id="file-upload" 
-                    name="file-upload" 
-                    type="file" 
-                    multiple 
-                    className="sr-only" 
-                    onChange={handleFileChange}
-                />
-                {attachments.length > 0 && (
-                    <div className="mt-3 space-y-2">
-                        <ul className="space-y-1">
-                            {attachments.map((file) => (
-                                <li key={`${file.name}-${file.size}-${file.lastModified}`} className="flex items-center justify-between text-sm text-slate-700 bg-slate-100 px-3 py-1.5 rounded-md">
-                                    <span className="truncate mr-2" title={file.name}>{file.name}</span>
-                                    <button type="button" onClick={() => handleRemoveAttachment(file)} className="p-1 text-red-500 hover:text-red-700 rounded-full hover:bg-red-100 flex-shrink-0" aria-label={`Remove ${file.name}`}>
-                                        <XIcon className="w-4 h-4" />
-                                    </button>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                )}
-            </div>
-            <textarea placeholder="Deskripsi detail laporan Anda..." value={description} onChange={(e) => setDescription(e.target.value)} required rows={4} className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition"></textarea>
-            
-            {isSubmitting && (
-                <div className="flex items-center p-4 text-sm text-blue-800 rounded-lg bg-blue-100" role="status">
-                    <SpinnerIcon className="w-4 h-4 mr-3 flex-shrink-0" />
-                    <div>
-                        <span className="font-medium">Submitting...</span> Uploading attachments and creating ticket. Please wait.
-                    </div>
+        ) : (
+            <>
+                <div className="flex items-center mb-6">
+                    <PlusCircleIcon className="w-7 h-7 text-indigo-500 mr-3" />
+                    <h2 className="text-xl font-bold text-slate-800">Buat Tiket Baru</h2>
                 </div>
-            )}
+                <form className="space-y-5" onSubmit={handleSubmit}>
+                    <div className="relative">
+                    <UserIcon className="w-5 h-5 text-slate-400 absolute top-1/2 left-4 -translate-y-1/2" />
+                    <input type="text" placeholder="Nama Anda" value={reporterName} onChange={(e) => setReporterName(e.target.value)} required className="w-full pl-12 pr-4 py-3 border border-slate-200 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition" />
+                    </div>
+                    <div className="relative">
+                    <PencilIcon className="w-5 h-5 text-slate-400 absolute top-1/2 left-4 -translate-y-1/2" />
+                    <input type="text" placeholder="Judul Laporan" value={title} onChange={(e) => setTitle(e.target.value)} required className="w-full pl-12 pr-4 py-3 border border-slate-200 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition" />
+                    </div>
+                    <div className="relative">
+                    <BuildingIcon className="w-5 h-5 text-slate-400 absolute top-1/2 left-4 -translate-y-1/2" />
+                    <input type="text" value={user.username} disabled className="w-full pl-12 pr-4 py-3 border border-slate-200 rounded-lg bg-slate-100 text-slate-500 cursor-not-allowed" />
+                    </div>
+                    <select 
+                        value={selectedCategory}
+                        onChange={handleCategoryChange}
+                        required
+                        className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition text-slate-500"
+                    >
+                    <option value="">Kategori</option>
+                    <option value="AC">AC</option>
+                    <option value="Kelistrikan">Kelistrikan</option>
+                    <option value="Perabotan">Perabotan</option>
+                    <option value="Saluran Air">Saluran Air</option>
+                    </select>
+                    <select 
+                        value={selectedSubCategory}
+                        onChange={(e) => setSelectedSubCategory(e.target.value)}
+                        disabled={!selectedCategory}
+                        required
+                        className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition text-slate-500 disabled:bg-slate-100 disabled:cursor-not-allowed"
+                    >
+                        <option value="">Sub Kategori</option>
+                        {subCategories.map(subCat => (
+                        <option key={subCat} value={subCat}>{subCat}</option>
+                        ))}
+                    </select>
+                    <div>
+                        <label htmlFor="file-upload" className="w-full cursor-pointer flex items-center justify-center py-3 px-4 border border-dashed border-slate-300 rounded-lg text-sm font-medium text-slate-500 bg-slate-50 hover:bg-slate-100 focus:outline-none transition-colors">
+                            <UploadIcon className="w-5 h-5 mr-2" />
+                            <span>Upload Lampiran</span>
+                        </label>
+                        <input 
+                            id="file-upload" 
+                            name="file-upload" 
+                            type="file" 
+                            multiple 
+                            className="sr-only" 
+                            onChange={handleFileChange}
+                        />
+                        {attachments.length > 0 && (
+                            <div className="mt-3 space-y-2">
+                                <ul className="space-y-1">
+                                    {attachments.map((file) => (
+                                        <li key={`${file.name}-${file.size}-${file.lastModified}`} className="flex items-center justify-between text-sm text-slate-700 bg-slate-100 px-3 py-1.5 rounded-md">
+                                            <span className="truncate mr-2" title={file.name}>{file.name}</span>
+                                            <button type="button" onClick={() => handleRemoveAttachment(file)} className="p-1 text-red-500 hover:text-red-700 rounded-full hover:bg-red-100 flex-shrink-0" aria-label={`Remove ${file.name}`}>
+                                                <XIcon className="w-4 h-4" />
+                                            </button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                    </div>
+                    <textarea placeholder="Deskripsi detail laporan Anda..." value={description} onChange={(e) => setDescription(e.target.value)} required rows={4} className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition"></textarea>
+                    
+                    {isSubmitting && (
+                        <div className="flex items-center p-4 text-sm text-blue-800 rounded-lg bg-blue-100" role="status">
+                            <SpinnerIcon className="w-4 h-4 mr-3 flex-shrink-0" />
+                            <div>
+                                <span className="font-medium">Submitting...</span> Uploading attachments and creating ticket. Please wait.
+                            </div>
+                        </div>
+                    )}
 
-            {showSuccessMessage && (
-            <div className="flex items-center p-4 text-sm text-green-800 rounded-lg bg-green-100 border border-green-200" role="alert">
-                <CheckCircleIcon className="w-5 h-5 mr-3"/>
-                <span className="font-medium">Tiket berhasil dibuat!</span> 
-            </div>
-            )}
+                    {showSuccessMessage && (
+                    <div className="flex items-center p-4 text-sm text-green-800 rounded-lg bg-green-100 border border-green-200" role="alert">
+                        <CheckCircleIcon className="w-5 h-5 mr-3"/>
+                        <span className="font-medium">Tiket berhasil dibuat!</span> 
+                    </div>
+                    )}
 
-            <button type="submit" disabled={isSubmitting} className="w-full flex items-center justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-transform transform hover:scale-105 disabled:bg-indigo-300 disabled:cursor-not-allowed">
-              {isSubmitting ? <SpinnerIcon className="w-5 h-5 mr-2" /> : <SendIcon className="w-5 h-5 mr-2" />}
-              {isSubmitting ? 'Mengirim...' : 'Submit Ticket'}
-            </button>
-        </form>
+                    <button type="submit" disabled={isSubmitting} className="w-full flex items-center justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-transform transform hover:scale-105 disabled:bg-indigo-300 disabled:cursor-not-allowed">
+                      {isSubmitting ? <SpinnerIcon className="w-5 h-5 mr-2" /> : <SendIcon className="w-5 h-5 mr-2" />}
+                      {isSubmitting ? 'Mengirim...' : 'Submit Ticket'}
+                    </button>
+                </form>
+            </>
+        )}
         </div>
 
         {/* Submitted Tickets */}
